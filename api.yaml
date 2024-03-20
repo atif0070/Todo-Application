@@ -1,0 +1,782 @@
+openapi: 3.0.0
+info:
+  title: Todo-Application
+  description: Todo
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:9000
+    description: Local Server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      in: header
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
+
+paths:
+  /todo-app/users/register:
+    post:
+      summary: Creates a user.
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /todo-app/users/login:
+    post:
+      summary: Logs in a user.
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+  /todo-app/users/fetch-all-users:
+    get:
+      summary: Fetches all users.
+      tags:
+        - users
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    username:
+                      type: string
+                    email:
+                      type: string
+                    createdAt:
+                      type: string
+                      format: date-time
+                    updatedAt:
+                      type: string
+                      format: date-time
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /todo-app/users/update:
+    put:
+      summary: Update a user.
+      tags:
+        - users
+      security:
+        - bearerAuth: [] # Apply security scheme
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                email:
+                  type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+
+  /todo-app/users/delete:
+    delete:
+      summary: Delete a user.
+      tags:
+        - users
+      security:
+        - bearerAuth: [] # Apply security scheme
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /todo-app/todo-projects/create:
+    post:
+      summary: Creates a project.
+      tags:
+        - projects
+      security:
+        - bearerAuth: [] # Apply security scheme
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /todo-app/todo-projects/fetch-all-projects:
+    get:
+      summary: Fetches all projects.
+      tags:
+        - projects
+      security:
+        - bearerAuth: [] # Apply security scheme
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    description:
+                      type: string
+  /todo-app/todo-projects/update-project/{projectId}:
+    put:
+      summary: Updates a project.
+      tags:
+        - projects
+      security:
+        - bearerAuth: [] # Apply security scheme
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          description: ID of the project to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /todo-app/todo-projects/delete-project/{projectId}:
+    delete:
+      summary: Deletes a project.
+      tags:
+        - projects
+      security:
+        - bearerAuth: [] # Apply security scheme
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          description: ID of the project to delete
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /todo-app/todo-items/create/{projectId}:
+    post:
+      summary: Creates a todo item under a specific project.
+      tags:
+        - todo-items
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          description: ID of the project to add the todo item
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                dueDate:
+                  type: string
+                  format: date
+                priority:
+                  type: string
+                status:
+                  type: string
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /todo-app/todo-items/fetch-all-items/{projectId}:
+    get:
+      summary: Fetches all todo items under a specific project.
+      tags:
+        - todo-items
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          description: ID of the project to fetch todo items from
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    dueDate:
+                      type: string
+                      format: date
+                    priority:
+                      type: string
+                    status:
+                      type: string
+
+  /todo-app/todo-items/update-item/{todoItemId}:
+    put:
+      summary: Updates a todo item.
+      tags:
+        - todo-items
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: itemId
+          required: true
+          description: ID of the todo item to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                dueDate:
+                  type: string
+                  format: date
+                priority:
+                  type: string
+                status:
+                  type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /todo-app/todo-items/delete-item/{todoItemId}:
+    delete:
+      summary: Deletes a todo item.
+      tags:
+        - todo-items
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: itemId
+          required: true
+          description: ID of the todo item to delete
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /todo-app/todo-comments/create/{todoItemId}:
+    post:
+      summary: Creates a comment for a specific todo item.
+      tags:
+        - todo-comments
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: todoItemId
+          required: true
+          description: ID of the todo item to add the comment to
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: string
+  /todo-app/todo-comments/fetch/{todoItemId}:
+    get:
+      summary: Fetches all comments for a specific todo item.
+      tags:
+        - todo-comments
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: todoItemId
+          required: true
+          description: ID of the todo item to fetch comments from
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    text:
+                      type: string
+                    userId:
+                      type: string
+                    todoItemId:
+                      type: string
+                    createdAt:
+                      type: string
+                    updatedAt:
+                      type: string
+
+  /todo-app/todo-comments/update-comment/{commentId}:
+    put:
+      summary: Updates a comment.
+      tags:
+        - todo-comments
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: commentId
+          required: true
+          description: ID of the comment to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /todo-app/todo-comments/delete-comment/{commentId}:
+    delete:
+      summary: Deletes a comment.
+      tags:
+        - todo-comments
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: commentId
+          required: true
+          description: ID of the comment to delete
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /todo-app/todo-category/create/{todoItemId}:
+    post:
+      summary: Creates a category for a specific todo item.
+      tags:
+        - todo-category
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: todoItemId
+          required: true
+          description: ID of the todo item to add the category to
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: string
+  /todo-app/todo-category/fetch-all-category:
+    get:
+      summary: Fetches all categories.
+      tags:
+        - todo-category
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    createdAt:
+                      type: string
+                      format: date-time
+                    updatedAt:
+                      type: string
+                      format: date-time
+        "404":
+          description: No categories found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /todo-app/todo-category/update-category/{categoryId}:
+    put:
+      summary: Updates a category.
+      tags:
+        - todo-category
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: categoryId
+          required: true
+          description: ID of the category to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /todo-app/todo-category/delete-category/{categoryId}:
+    delete:
+      summary: Deletes a category.
+      tags:
+        - todo-category
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: categoryId
+          required: true
+          description: ID of the category to delete
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /todo-app/todo-tags/create/{todoItemId}:
+    post:
+      summary: Creates a tag for a specific todo item.
+      tags:
+        - todo-tags
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: todoItemId
+          required: true
+          description: ID of the todo item to add the tag to
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /todo-app/todo-tags/fetch-all-tag/{todoItemId}:
+    get:
+      summary: Fetches all tags for a specific todo item.
+      tags:
+        - todo-tags
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: todoItemId
+          required: true
+          description: ID of the todo item to fetch tags from
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+
+  /todo-app/todo-tags/update-tag/{tagId}:
+    put:
+      summary: Updates a tag.
+      tags:
+        - todo-tags
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: tagId
+          required: true
+          description: ID of the tag to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /todo-app/todo-tags/delete-tag/{tagId}:
+    delete:
+      summary: Deletes a tag.
+      tags:
+        - todo-tags
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: tagId
+          required: true
+          description: ID of the tag to delete
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
